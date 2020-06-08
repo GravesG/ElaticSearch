@@ -5,14 +5,21 @@ import com.graves.gravesesapi.pojo.User;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,6 +54,14 @@ class GravesEsApiApplicationTests {
         System.out.println(delete.isAcknowledged());
     }
 
+    /**
+     * @author Graves
+     * @DESCRIPTION:
+     * @params: 测试添加文档
+     * @return: void
+     * @Date: 2020/6/8 21:59 
+     * @Modified By:  
+    */
     @Test
     void testAddDocument() throws IOException {
         User user = new User("Graves",3);
@@ -62,5 +77,72 @@ class GravesEsApiApplicationTests {
         IndexResponse index = restHighLevelClient.index(request, RequestOptions.DEFAULT);
         System.out.println(index.toString());
         System.out.println(index.status());
+    }
+
+    /**
+     * @author Graves
+     * @DESCRIPTION:
+     * @params: 判断文档是否存在
+     * @return: void
+     * @Date: 2020/6/8 22:08 
+     * @Modified By:  
+    */
+    @Test
+    void testIsExists() throws IOException {
+        GetRequest request = new GetRequest("graves_index","1");
+        // 不获取返回的_source 的上下文了
+        request.fetchSourceContext(new FetchSourceContext(false));
+        request.storedFields("_none_");
+
+        boolean exists = restHighLevelClient.exists(request, RequestOptions.DEFAULT);
+        System.out.println(exists);
+    }
+
+    /**
+     * @author Graves
+     * @DESCRIPTION:
+     * @params: 获取文档信息
+     * @return: void
+     * @Date: 2020/6/8 22:15 
+     * @Modified By:  
+    */
+    @Test
+    void testGetDocument() throws IOException {
+        GetRequest request = new GetRequest("graves_index","1");
+        GetResponse documentFields = restHighLevelClient.get(request, RequestOptions.DEFAULT);
+        System.out.println(documentFields.getSourceAsString()); //打印文档内容
+        System.out.println(documentFields); //但会全部内容和命令是一致的
+    }
+
+    /**\
+     * 更新文档
+     * @throws IOException
+     */
+    @Test
+    void testUpdateDocument() throws IOException {
+        UpdateRequest request = new UpdateRequest("graves_index","1");
+        request.timeout("1s");
+
+        User user = new User("GravesEs",18);
+        request.doc(JSON.toJSONString(user),XContentType.JSON);
+        UpdateResponse update = restHighLevelClient.update(request, RequestOptions.DEFAULT);
+        System.out.println(update.status());
+    }
+
+    /**
+     * @author Graves
+     * @DESCRIPTION:
+     * @params: 删除文档
+     * @return: void
+     * @Date: 2020/6/8 22:22 
+     * @Modified By:  
+    */
+    @Test
+    void testDelDocument() throws IOException {
+        DeleteRequest request = new DeleteRequest("graves_index","1");
+        request.timeout("1s");
+
+        DeleteResponse delete = restHighLevelClient.delete(request, RequestOptions.DEFAULT);
+        System.out.println(delete.status());
     }
 }
