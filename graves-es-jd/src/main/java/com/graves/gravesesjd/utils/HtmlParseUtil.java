@@ -1,16 +1,12 @@
 package com.graves.gravesesjd.utils;
 
 import com.graves.gravesesjd.pojo.Content;
-import org.elasticsearch.client.license.LicensesStatus;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.naming.Context;
-import javax.naming.Name;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
